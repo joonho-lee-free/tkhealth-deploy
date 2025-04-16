@@ -1,29 +1,15 @@
 import os
-import base64
-import json
 import datetime
 import firebase_admin
 from firebase_admin import credentials, storage, firestore
 from flask import Flask, request, jsonify
 import uuid
+import base64
 
-# ✅ 환경변수에서 base64로 저장된 키 가져오기
-firebase_key_base64 = os.environ.get("FIREBASE_KEY_BASE64")
-
-# 디버깅 로그 찍기 🔍
-print("🔥 FIREBASE_KEY_BASE64 exists:", firebase_key_base64 is not None)
-
-if not firebase_key_base64:
-    raise ValueError("FIREBASE_KEY_BASE64 환경변수가 설정되지 않았습니다.")
-
-# 🔓 base64 → json 문자열 → 딕셔너리
-decoded_key = base64.b64decode(firebase_key_base64).decode("utf-8")
-key_dict = json.loads(decoded_key)
-
-# 🔌 Firebase 초기화
-cred = credentials.Certificate(key_dict)
+# ✅ firebase-key.json 직접 불러오기
+cred = credentials.Certificate("firebase-key.json")
 firebase_admin.initialize_app(cred, {
-    'storageBucket': f"{key_dict['project_id']}.appspot.com"
+    'storageBucket': f"{cred.project_id}.appspot.com"
 })
 db = firestore.client()
 
