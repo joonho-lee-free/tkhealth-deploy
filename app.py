@@ -1,4 +1,5 @@
 import os
+import json
 import datetime
 import firebase_admin
 from firebase_admin import credentials, storage, firestore
@@ -6,10 +7,14 @@ from flask import Flask, request, jsonify
 import uuid
 import base64
 
-# ✅ firebase-key.json 직접 불러오기
-cred = credentials.Certificate("firebase-key.json")
+# ✅ base64 환경변수에서 Firebase 키 디코딩
+firebase_key_base64 = os.environ.get("FIREBASE_KEY_BASE64")
+if not firebase_key_base64:
+    raise ValueError("FIREBASE_KEY_BASE64 환경변수가 설정되지 않았습니다.")
+firebase_json = json.loads(base64.b64decode(firebase_key_base64).decode("utf-8"))
+cred = credentials.Certificate(firebase_json)
 firebase_admin.initialize_app(cred, {
-    'storageBucket': f"{cred.project_id}.appspot.com"
+    'storageBucket': f"{firebase_json['project_id']}.appspot.com"
 })
 db = firestore.client()
 
